@@ -38,7 +38,7 @@ import os
 from sklearn.metrics import median_absolute_error
 
 #this is for reproducibility on different machines, and for different datasets
-path = "/home/daniels/Documents/School/MAT496/FinalExam/Data/Data/"
+path = "C:\\Users\\dfshi\\Documents\\School\\MAT496\\Final\\Data\\"
 DATASET_FOLDER = "Zoo"
 os.chdir(path + DATASET_FOLDER)
 DATASET_NAME = "zoo.csv"
@@ -72,9 +72,20 @@ clf.alpha_
 clf = lin.LassoCV(alphas=[1e-5,1e-4,1e-3, 1e-2, 1e-1, 1,1e2]).fit(X_train, y_train)
 clf.score(X_test, y_test)
 clf.get_params()
+betas = clf.coef_
 
+np.argmax(betas)
+
+np.argsort(betas)[:5:-1]
+np.argsort(betas)[:10]
+zeros = []
+for i in enumerate(betas):
+     if i[1] == 0:
+         zeros.append(i[0])
+         
+cut_vars = X.iloc[:,zeros]
 clf.alpha_
-
+dir(clf)
 """
 both perform equally well with the same lambda = 0.1 
 
@@ -96,3 +107,4 @@ plt.ylabel("Model predictions")
 plt.xlabel("Truths")
 plt.xlim([0, 10])
 _ = plt.ylim([0, 10])
+
