@@ -87,13 +87,61 @@ Hypothesis test that high levels of poverty correlate to higher levels of ambien
     -The intuition for this is fairly simple, living in a poorer neighborhood might lead to less serviced appliances or in less desireable areas. This could be due to pollution
     Focux on NOX pollution
     
-    Hnull = mean(NOX) = mean(NOX_high_pov)
+    Hnull = mean(NOX) = mean(NOX_high_poor)
     
     define high_pov  > 0.8 quantile
     
+    just by comparing null mean to sample mean, they are essentially identical. This indicates the poor wouldn't effect NOX much so I decided to look elsewhere
+    (high_pov mean = -0.21547241438417064 , sample mean = -0.21547241438417059)
+    
+    what about high levels of HC pollution?
+    
+    Null hypothesis
+    
+    mean(NOX) = mean(NOX_high_HC)
+    sample mean = -0.21547241438417059
+    under null hyp = 0.9148508907018157
+    
+    this might be statistically significant, to determine if it is we can bootsstrap it
+    since sample mean < null hyp mean compute the percentile and see if its less than 0.05
+    
 """
-poor = data['POOR']
-nox = data['nox']
-pov_lim = np.argquantile(poor, 0.8)
+poor = data['HC']
+nox = data['NOX']
+truemean = np.mean(nox)
+pov_lim = np.quantile(poor, 0.8)
+high_pov = []
 
-high_pov = [i for i, e in enumerate()]
+for i, e in enumerate(poor):
+    if e > pov_lim:
+        high_pov.append(nox.iloc[i])
+        
+#BOOTSTAP
+
+#calc null hyp mean
+nullmean = np.mean(high_pov)
+
+#Shift data by new mean
+nox -= np.mean(nox)
+nox += nullmean
+
+# Resample from null hypothes-shifted data
+
+B = 10000 
+resamples = np.zeros(B)
+resample_size = int(len(nox)/2)
+
+for i in range(B):
+    xstar = np.random.choice(nox, size=resample_size)
+    resamples[i] = np.mean(xstar)
+
+# compute the 0.05 percentile    
+perc = np.percentile(resamples, 0.05)
+
+if truemean < perc:
+    print("Reject the null hypothesis")
+    
+"""
+There it is! We reject the hypothesis that the mean of NOX with high HC is the same as the mean of NOX, this implies that higher HC influences NOX values. 
+Note that we could've also used the central limit theorem to generate a confidence interval since the data is independent, the sample size is >30 and we're comparing means .
+"""
